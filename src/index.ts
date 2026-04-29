@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { program } from "commander";
 import { chromium } from "playwright";
 import * as fs from "fs";
