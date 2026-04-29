@@ -24,6 +24,8 @@ program
   .option("--depth <n>", "BFS crawl depth", "1")
   .option("--output <dir>", "Output directory", "./output")
   .option("--concurrency <n>", "Max parallel page analyses", "3")
+  .option("--max-segments <n>", "Cap segments per page (useful for testing)", "0")
+  .option("--headless", "Run browser in headless mode (default: visible window)", false)
   .parse();
 
 const opts = program.opts<{
@@ -34,6 +36,8 @@ const opts = program.opts<{
   depth: string;
   output: string;
   concurrency: string;
+  maxSegments: string;
+  headless: boolean;
 }>();
 
 async function main() {
@@ -43,6 +47,7 @@ async function main() {
   const guidelines = fs.readFileSync(opts.guidelines, "utf-8");
   const maxDepth = parseInt(opts.depth, 10);
   const concurrency = parseInt(opts.concurrency, 10);
+  const maxSegments = parseInt(opts.maxSegments, 10);
 
   fs.mkdirSync(opts.output, { recursive: true });
 
@@ -56,7 +61,15 @@ async function main() {
   changeSet.forEach((c) => console.log(`     • [${c.changeType}] ${c.attribute}: "${c.oldValue}" → "${c.newValue}"`));
 
   console.log("\n🌐 Step 2: Crawling site...");
-  const browser = await chromium.launch({ headless: true });
+  console.log(`  Browser mode: ${opts.headless ? "headless" : "visible window"}`);
+  const browser = await chromium.launch({
+    headless: opts.headless,
+    args: [
+      "--no-sandbox",
+      "--disable-blink-features=AutomationControlled",
+      "--disable-http2",
+    ],
+  });
 
   let urls: string[];
   try {
@@ -77,8 +90,13 @@ async function main() {
         console.log(`\n  Processing: ${url}`);
         try {
           const { html, title } = await scrapePage(browser, url);
-          const segments = extractSegments(html, url);
-          console.log(`  [segmenter] ${segments.length} segments extracted from "${title}"`);
+          let segments = extractSegments(html, url);
+          if (maxSegments > 0 && segments.length > maxSegments) {
+            console.log(`  [segmenter] ${segments.length} segments extracted from "${title}" (capped at ${maxSegments})`);
+            segments = segments.slice(0, maxSegments);
+          } else {
+            console.log(`  [segmenter] ${segments.length} segments extracted from "${title}"`);
+          }
 
           if (segments.length === 0) {
             console.log("  [segmenter] no copy segments found, skipping page");

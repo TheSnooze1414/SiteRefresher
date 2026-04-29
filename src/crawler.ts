@@ -14,7 +14,11 @@ export async function crawl(
   const discovered: string[] = [];
 
   const page = await browser.newPage();
-  await page.setExtraHTTPHeaders({ "User-Agent": "copy-refresh-bot/1.0" });
+  await page.setExtraHTTPHeaders({
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Accept-Language": "en-US,en;q=0.9",
+  });
+  await page.setViewportSize({ width: 1440, height: 900 });
 
   while (queue.length > 0) {
     const item = queue.shift()!;

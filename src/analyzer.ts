@@ -67,7 +67,19 @@ export async function analyzeSegments(
     system: [
       {
         type: "text",
-        text: `You are a copy review assistant. Your job is to determine which copy segments on a product page need to be updated because of spec changes.\n\nCopy guidelines for this project:\n${guidelines}`,
+        text: `You are a copy review assistant. Your job is to determine which copy segments on a product page need to be updated because of spec changes.
+
+A segment is AFFECTED if ANY of the following are true:
+- It states a specific value that has changed (e.g. "8-inch screen" when the screen is now 12 inches)
+- It uses language that is now inaccurate or outdated due to a spec change (e.g. "wired Apple CarPlay" when it is now wireless)
+- It describes something as optional/unavailable that is now standard, or vice versa
+- It omits a new trim level, feature, or capability introduced in the new spec
+- It describes the old state of a feature that has been upgraded or removed
+- It could give a consumer a false impression of the product in light of the changes
+
+Be INCLUSIVE: when in doubt, flag it. It is better to flag a segment that doesn't need updating than to miss one that does. The human reviewer will make the final call.
+
+Copy guidelines for this project:\n${guidelines}`,
         cache_control: { type: "ephemeral" },
       },
     ],
@@ -77,12 +89,12 @@ export async function analyzeSegments(
         content: [
           {
             type: "text",
-            text: `The following spec changes have been made:\n\n${changeSetJson}`,
+            text: `The following spec changes have been made between the old and new model year:\n\n${changeSetJson}`,
             cache_control: { type: "ephemeral" },
           },
           {
             type: "text",
-            text: `Review these copy segments from the page at ${pageUrl} and identify which ones reference or imply any of the changed attributes. A segment is affected if it mentions, references, or could be misunderstood in light of the changes.\n\n${segmentsJson}\n\nCall report_segment_analyses with your assessment of every segment.`,
+            text: `Review these copy segments from the page at ${pageUrl}. For each segment, determine whether it needs to be updated given the spec changes above. Remember: flag anything that references, implies, or could be misleading in light of ANY of the changes — even indirectly.\n\n${segmentsJson}\n\nCall report_segment_analyses with your assessment of every segment.`,
           },
         ],
       },
