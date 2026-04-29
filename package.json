@@ -1,0 +1,22 @@
+{
+  "name": "copy-refresh",
+  "version": "1.0.0",
+  "description": "Crawl a website, diff spec documents, and propose copy updates for human review",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "cheerio": "^1.0.0",
+    "commander": "^12.0.0",
+    "p-limit": "^6.1.0",
+    "playwright": "^1.49.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
